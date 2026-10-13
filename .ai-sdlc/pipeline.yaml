@@ -1,0 +1,21 @@
+apiVersion: ai-sdlc.io/v1alpha1
+kind: Pipeline 
+metadata: 
+  name: python-calculator-pipeline 
+spec: 
+  triggers: 
+    - event: manual # Se activa a demanda 
+  definitionOfReady: 
+    enforcement: hard-mandatory 
+    rules: 
+      - check: no-open-questions 
+  stages: 
+    - name: implement 
+      agent: python-coder-agent 
+      constraints: 
+        allowedPaths: ["src/\*\*", "tests/\*\*"] 
+    - name: pytest-coverage 
+      enforcement: hard-mandatory 
+      rule: 
+        metric: line-coverage 
+        threshold: 85

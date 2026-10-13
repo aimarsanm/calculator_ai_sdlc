@@ -1,0 +1,9 @@
+apiVersion: ai-sdlc.io/v1alpha1
+kind: AgentRole 
+metadata: 
+  name: python-coder-agent 
+spec: 
+  role: "Python Software Engineer" 
+  tools: [code\_editor, terminal] 
+  constraints: 
+    maxFilesPerChange: 5
