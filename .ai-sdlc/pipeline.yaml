@@ -12,7 +12,8 @@ spec:
     sourceControl:
       type: github
       config:
-        org: your-org
+        org: aimarsanm
+        repo: calculator_ai_sdlc
   stages:
     - name: validate
       qualityGates:
