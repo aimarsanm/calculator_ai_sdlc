@@ -4,6 +4,9 @@ metadata:
   name: python-coder-agent 
 spec: 
   role: "Python Software Engineer" 
-  tools: [code\_editor, terminal] 
+  goal: "Desarrollar el módulo de la calculadora en Python y sus pruebas unitarias en pytest" 
+  tools: 
+    - code_editor 
+    - terminal 
   constraints: 
     maxFilesPerChange: 5

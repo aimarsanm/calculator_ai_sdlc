@@ -1,0 +1,11 @@
+apiVersion: ai-sdlc.io/v1alpha1
+kind: QualityGate 
+metadata: 
+  name: pytest-coverage 
+spec: 
+  gates: 
+    - name: line-coverage 
+      enforcement: hard-mandatory 
+      rules: 
+        - metric: line-coverage 
+          threshold: 85
