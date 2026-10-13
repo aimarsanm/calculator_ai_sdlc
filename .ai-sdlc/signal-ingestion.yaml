@@ -1,0 +1,196 @@
+# RFC-0030 Signal Ingestion Pipeline configuration (§11).
+#
+# Per-org config for the Demand Sources → D1 pipeline. Pluggable source
+# adapters fetch raw signals (support tickets, community threads, manual
+# entries), classify them by tier + ICP + recency, cluster them into
+# demand themes, filter through SA resonance, and feed D1 cluster-level
+# demand scores into PPA.
+#
+# Ships DISABLED by default. The pipeline is gated by both:
+#   1. `spec.enabled: true` in this file
+#   2. `AI_SDLC_SIGNAL_INGESTION` env flag set to a truthy value during
+#      the soak window (1/true/yes/on). Post-promotion the flag is default-on
+#      and only the YAML toggle matters.
+#
+# Configuration changes emit `SignalIngestionConfigChanged` governance
+# events to `<ARTIFACTS_DIR>/_orchestrator/events-YYYY-MM-DD.jsonl`. Edits
+# to tier multipliers, thresholds, or adapter lists are governance-relevant
+# (RFC-0030 §11 closing note) — log + product-lead review them like any
+# other DID-adjacent decision.
+#
+# Operator runbook: docs/operations/signal-ingestion.md
+# Promotion runbook: docs/operations/signal-ingestion-promotion.md
+# Schema: spec/schemas/signal-ingestion-config.v1.schema.json
+# RFC: spec/rfcs/RFC-0030-signal-ingestion-pipeline.md
+# Re-walkthrough (2026-05-26): AISDLC-430..434 rolled up OQ-13.1..13.5
+# refinements onto the shipped Phase 1-6 substrate. All refinements
+# reflected in this stub and the runbook.
+
+apiVersion: ai-sdlc.io/v1alpha1
+kind: SignalIngestionConfig
+metadata:
+  name: signal-ingestion
+spec:
+  # Master switch. Flip to `true` AFTER:
+  #   1. You have configured at least one working adapter under `adapters:`
+  #   2. You have set the `AI_SDLC_SIGNAL_INGESTION` env flag (soak window)
+  #   3. You have read docs/operations/signal-ingestion.md for the runbook
+  enabled: false
+
+  # Tier multipliers (RFC-0030 §6.1).
+  # Per-customer-tier weight applied at D1 scoring time. The Churned multiplier
+  # (default 2.0) is intentionally high: churned customers are the strongest
+  # signal of product-market gap. Tune for your deployment heterogeneity —
+  # B2B enterprise platforms typically raise `enterprise` (e.g. 5.0) and
+  # flatten `smb` / `free` (e.g. 0.25). Consumer products typically flatten
+  # all tiers to ~1.0 since tier is less informative.
+  # tierMultipliers:
+  #   enterprise: 3.0
+  #   mid: 1.5
+  #   smb: 1.0
+  #   free: 0.5
+  #   churned: 2.0
+
+  # ICP resonance weights (RFC-0030 §6.2).
+  # Strong = signal source matches declared ICP segments verbatim.
+  # Partial = adjacent segment (e.g. enterprise but wrong industry vertical).
+  # Weak = peripheral (e.g. student account on a B2B product).
+  # icpResonanceWeights:
+  #   strong: 1.5
+  #   partial: 1.0
+  #   weak: 0.5
+
+  # Recency decay half-life in days (RFC-0030 §6.3).
+  # Exponential decay; signals older than ~6 months contribute < 2% of their
+  # original weight at the default. Shorten (e.g. 14) for rapidly-evolving
+  # products; lengthen (e.g. 60) for products with slow signal cycles.
+  # recencyHalfLifeDays: 30
+
+  # Tier 2 significance threshold (RFC-0030 §8).
+  # Tier 2 signals (community, competitive) only feed D1 once a cluster crosses
+  # ALL of these gates. The `minTier1SignalCount: 1` gate is the structural
+  # defense against adversarial flooding (OQ-13.5): community buzz without
+  # any direct customer signal stays in the monitor-only zone.
+  # tier2SignificanceThreshold:
+  #   minSignalCount: 5
+  #   minUniqueSources: 3
+  #   minTier1SignalCount: 1
+  #   minClusterAgeDays: 7
+
+  # SA resonance thresholds (RFC-0030 §9).
+  # Per RFC-0029 Principle 4 "The Soul Holds" — high-SA clusters get full
+  # weight, mid-SA discounted, low-SA flagged for review, zero-SA excluded.
+  # When aggregate cluster SA resonance drops below 0.4 sustained for
+  # 3 sprints, the SoulDriftDetected event fires with
+  # `driftSource: demandMisalignment`.
+  # saResonanceThresholds:
+  #   fullWeight: 0.7
+  #   discounted: 0.4
+  #   excluded: 0.0
+
+  # Clustering algorithm + similarity threshold (RFC-0030 §7).
+  # `bm25` is the deterministic-first default (no external dependencies).
+  # `embedding` requires a configured RFC-0019 embedding provider adapter.
+  # Raise `similarityThreshold` (closer to 1.0) for stricter clustering;
+  # lower for looser theme aggregation.
+  # clustering:
+  #   algorithm: bm25
+  #   similarityThreshold: 0.6
+
+  # D1 composition weights (RFC-0030 §10 / AISDLC-347 Phase 5).
+  # Non-replacement: signal-pipeline-derived demand and human-authored
+  # backlog-item demand both feed D1. The composer normalises the pair to
+  # sum to 1; default 50/50 keeps neither stream dominant out of the box.
+  # Raise `signalPipelineWeight` after the pipeline has soaked and you
+  # trust its output more than manual translation.
+  # d1Composition:
+  #   signalPipelineWeight: 0.5
+  #   backlogItemWeight: 0.5
+
+  # Adapter list (RFC-0030 §5 / OQ-13.1 v0.3 re-walkthrough — AISDLC-430).
+  # v1 ships env-var-based adapters ONLY. OAuth-required adapters (full
+  # Salesforce / HubSpot, Zendesk-with-OAuth) wait for the credential-mgmt
+  # RFC. Adapters declaring `requiresOAuth: true` are refused at
+  # registration with Decision: adapter-requires-credential-mgmt-rfc.
+  #
+  # Shipped adapters and their credential env vars:
+  #   - signal-source-support-ticket  → SIGNAL_ZENDESK_PAT
+  #   - signal-source-community-thread → SIGNAL_COMMUNITY_BOT_TOKEN
+  #   - signal-source-in-app-feedback  → SIGNAL_IN_APP_FEEDBACK_API_KEY
+  #   - signal-source-manual           → no credential (see manualEntry block)
+  #
+  # Credential failure Decisions:
+  #   - adapter-credential-not-configured: env var missing → SET the var
+  #   - adapter-credential-rejected: env var present but auth failed → ROTATE
+  # Pipeline continues with remaining valid adapters in both cases (G0).
+  # adapters:
+  #   - signal-source-support-ticket
+  #   - signal-source-community-thread
+  #   - signal-source-in-app-feedback
+
+  # Language acceptance (RFC-0030 OQ-13.2 v0.3 re-walkthrough — AISDLC-431).
+  # Detection: `franc` library (deterministic; <10ms per signal; JS-native;
+  # MIT-licensed; 95%+ accuracy on text >50 chars). Language detection runs
+  # at the classifier before any clustering step.
+  # Default [en] — English-only. Orgs with non-English customer bases can
+  # add languages: [en, fr, es, de, ja, ...]. Note the documented trade-off:
+  # BM25 clustering degrades ~15-30% precision without per-language
+  # stopwords/stemming (Robertson & Zaragoza §3.5). LLM ICP-resonance and
+  # embedding clustering are native multi-language (no degradation there).
+  # Non-accepted signals: Decision: signal-language-unsupported — dropped and
+  # logged to catalog for visible-gap metric; pipeline continues (G0).
+  # Opt in knowingly — see docs/operations/signal-ingestion.md §2.5.
+  # acceptedLanguages:
+  #   - en
+
+  # Per-stage data residency enforcement (RFC-0030 OQ-13.3 v0.3 — AISDLC-432).
+  # RFC-0022 owns regime DECLARATION (compliance.yaml). This block gates
+  # ENFORCEMENT at each signal-pipeline stage. All points default ON when
+  # any regime is declared; disable selectively only when your regime allows it
+  # (rare — every override emits SignalIngestionConfigChanged).
+  # residencyEnforcement:
+  #   sourceFromCompliancePosture: true   # derive allowedRegions from RFC-0022
+  #   enforcementPoints:
+  #     fetchSignals: true                # refuse out-of-region signals at adapter
+  #     clustering: true                  # prevent cross-region cluster merging
+  #     storage: true                     # persist residencyRegion field; elevate cross-region read audit
+  #     unifiedCostReport: true           # break out per-region cost attribution
+  #   multiPostureBehavior: union         # GDPR+HIPAA: strictest of both applies
+
+  # Manual-entry anti-gaming (RFC-0030 OQ-13.4 v0.3 re-walkthrough — AISDLC-430).
+  # RFC-0022 OQ-2 audit trail pattern preserved (forced attestedBy +
+  # auto-filled attestedAt). Three additional anti-gaming hooks:
+  #   1. Per-operator daily rate limit (default 10/day). Above cap:
+  #      Decision: manual-signal-rate-limit-exceeded.
+  #   2. Optional evidenceUrl (call recording, ticket URL, transcript link).
+  #      When present, audit trail is materially stronger.
+  #   3. Rolling 7d manual-share quality metric. Above 30% sustained:
+  #      Decision: manual-signal-share-elevated (warning, not block).
+  # manualEntry:
+  #   dailyCapPerOperator: 10             # per-operator per-UTC-day; 0 = disabled
+  #   evidenceUrlOptional: true           # framework treats evidenceUrl as optional
+  #   qualityMetric:
+  #     enabled: true
+  #     windowDays: 7
+  #     shareWarningThreshold: 0.30       # >30% rolling 7d triggers Decision
+
+  # Adversarial-injection defense (RFC-0030 OQ-13.5 v0.3 — AISDLC-433).
+  # Two layers:
+  #   1. Tier 2 significance threshold (§8) — structural floor requiring ≥1
+  #      Tier 1 signal per cluster.
+  #   2. Z-score detector — runtime anomaly layer on rolling 7d baseline.
+  # Trigger: volume > 3σ above baseline AND unique sources in window < 3.
+  # Quarantine: flagged signals recorded but NOT fed to D1; auto-expires 24h.
+  # One-click unquarantine logs Decision: signal-flooding-false-positive for
+  # v2 reputation-weighting calibration. Reputation-weighting deferred to v2
+  # (cold-start unsafe — requires 7+ corpus windows of baseline data).
+  # flooding:
+  #   detection:
+  #     algorithm: z-score               # only z-score supported (AISDLC-433)
+  #     zScoreThreshold: 3.0
+  #     windowMinutes: 60
+  #     minUniqueSourcesForSuspicion: 3
+  #     baselineDays: 7
+  #   quarantine:
+  #     enabled: true
+  #     durationHours: 24

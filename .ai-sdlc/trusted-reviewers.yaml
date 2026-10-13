@@ -1,0 +1,28 @@
+# Trusted contributor signing keys for review attestations.
+#
+# This file is a stub created by `ai-sdlc init --with-attestation`. Add
+# entries by running `/ai-sdlc init-signing-key` on a contributor's
+# machine and opening a PR that appends the printed YAML block below.
+#
+# Schema:
+#   - identity:  free-form string (typically email or GitHub handle)
+#   - machine:   free-form label (lets one identity register multiple keys)
+#   - pubkey:    PEM-encoded ed25519 public key (multi-line block scalar)
+#   - addedAt:   ISO 8601 date the entry was added
+#   - addedBy:   GitHub handle of the maintainer who approved this entry's PR
+#
+# The verifier in CI uses a strict YAML format: every scalar value
+# single-quoted; `pubkey:` is a `|` block scalar with each PEM line
+# indented exactly 6 spaces; no tab characters anywhere.
+#
+# IMPORTANT — this file is AUDIT infrastructure, not ENFORCEMENT.
+# Populating this keyring does not, by itself, block any merge. The
+# scaffolded verify-attestation.yml workflow logs whether an attestation
+# envelope is present but never fails the build (see its own AUDIT-ONLY
+# header). Enforcement — a CI check or hook that actually blocks a PR
+# when review attestation is missing — is NOT installed by default and
+# remains the adopter's responsibility to build if wanted. Run
+# `ai-sdlc doctor` at any time to see the real state of this repo's
+# attestation governance (artifacts present vs. enforcement configured).
+
+reviewers: []
