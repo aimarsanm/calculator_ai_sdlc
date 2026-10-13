@@ -12,8 +12,9 @@ spec:
     sourceControl:
       type: github
       config:
+        owner: aimarsanm
         org: aimarsanm
-        repo: aimarsanm/calculator_ai_sdlc
+        repo: calculator_ai_sdlc
   stages:
     - name: validate
       qualityGates:
