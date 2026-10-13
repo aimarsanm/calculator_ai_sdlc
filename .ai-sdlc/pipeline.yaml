@@ -13,7 +13,7 @@ spec:
       type: github
       config:
         org: aimarsanm
-        repo: calculator_ai_sdlc
+        repo: aimarsanm/calculator_ai_sdlc
   stages:
     - name: validate
       qualityGates:
