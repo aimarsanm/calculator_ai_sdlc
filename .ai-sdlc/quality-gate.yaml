@@ -7,5 +7,5 @@ spec:
     - name: line-coverage 
       enforcement: hard-mandatory 
       rule: 
-        - metric: line-coverage 
+        - check: line-coverage 
           threshold: 85
