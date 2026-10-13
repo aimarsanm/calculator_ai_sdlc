@@ -4,7 +4,7 @@ metadata:
   name: python-calculator-pipeline 
 spec: 
   triggers: 
-    - event: manual # Se activa a demanda 
+    - event: issue.assigned
   definitionOfReady: 
     enforcement: hard-mandatory 
     rules: 
