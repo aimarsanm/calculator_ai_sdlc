@@ -6,6 +6,6 @@ spec:
   gates: 
     - name: line-coverage 
       enforcement: hard-mandatory 
-      rules: 
+      rule: 
         - metric: line-coverage 
           threshold: 85
