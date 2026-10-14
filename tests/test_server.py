@@ -37,7 +37,8 @@ def test_calculate_ok(base_url):
 
 def test_division_by_zero(base_url):
     status, body = post(base_url, {"expression": "1/0"})
-    assert status == 400 and "cero" in body["error"]
+    assert status == 400
+    assert "cero" in body["error"]
 
 
 def test_invalid_syntax(base_url):
