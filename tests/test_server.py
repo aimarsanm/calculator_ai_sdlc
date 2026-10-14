@@ -52,3 +52,17 @@ def test_serves_index_and_blocks_traversal(base_url):
     with pytest.raises(urllib.error.HTTPError) as e:
         urllib.request.urlopen(base_url + "/../server.py")
     assert e.value.code == 404
+
+
+def test_history_records_and_clears(base_url):
+    def call(method):
+        req = urllib.request.Request(base_url + "/api/history", method=method)
+        with urllib.request.urlopen(req) as r:
+            return json.load(r)
+
+    call("DELETE")
+    post(base_url, {"expression": "2+2"})
+    post(base_url, {"expression": "1/0"})
+    assert call("GET") == {"history": [{"expression": "2+2", "result": 4}]}
+    assert call("DELETE") == {"history": []}
+    assert call("GET") == {"history": []}

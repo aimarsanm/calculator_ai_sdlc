@@ -5,6 +5,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from calculadora import CalculatorError, evaluar
 
+HISTORY = []
+HISTORY_LIMIT = 50
 WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
 
 
@@ -20,6 +22,8 @@ class Handler(BaseHTTPRequestHandler):
         self._send(status, json.dumps(payload).encode("utf-8"))
 
     def do_GET(self):
+        if self.path.split("?")[0] == "/api/history":
+            return self._json(200, {"history": list(HISTORY)})
         name = "index.html" if self.path in ("/", "") else self.path.lstrip("/").split("?")[0]
         path = os.path.realpath(os.path.join(WEB_DIR, name))
         if not path.startswith(os.path.realpath(WEB_DIR) + os.sep) or not os.path.isfile(path):
@@ -35,11 +39,21 @@ class Handler(BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", 0))
             data = json.loads(self.rfile.read(min(length, 4096)) or b"{}")
             expression = data.get("expression") if isinstance(data, dict) else None
-            return self._json(200, {"result": evaluar(expression)})
+            result = evaluar(expression)
+            HISTORY.append({"expression": expression, "result": result})
+            del HISTORY[:-HISTORY_LIMIT]
+            return self._json(200, {"result": result})
         except CalculatorError as e:
             return self._json(400, {"error": str(e)})
         except (ValueError, TypeError):
             return self._json(400, {"error": "Sintaxis inválida"})
+
+
+    def do_DELETE(self):
+        if self.path.split("?")[0] != "/api/history":
+            return self._json(404, {"error": "No encontrado"})
+        HISTORY.clear()
+        return self._json(200, {"history": []})
 
 
 def main(port=8000):

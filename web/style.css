@@ -64,3 +64,15 @@ button:active { transform: scale(.95); }
 .back { align-self: flex-start; margin-bottom: .75rem; color: var(--text); text-decoration: none; opacity: .8; }
 .back:hover { opacity: 1; }
 [hidden] { display: none !important; }
+
+.calc-layout { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; align-items: flex-start; width: 100%; }
+.history { width: min(100%, 280px); padding: 1rem; border-radius: 16px; background: var(--panel, rgba(127,127,127,.15)); }
+.history-head { display: flex; justify-content: space-between; align-items: center; }
+.history h2 { margin: 0; font-size: 1.1rem; }
+.history-toggle { padding: .3rem .6rem; }
+.history.collapsed .history-body { display: none; }
+.history-list { list-style: none; margin: .75rem 0; padding: 0; max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: .4rem; }
+.history-item { width: 100%; text-align: right; padding: .5rem .7rem; font-size: .95rem; overflow-wrap: anywhere; }
+.history-empty { opacity: .7; margin: .75rem 0; }
+.history-clear { width: 100%; background: var(--danger); color: #fff; }
+
