@@ -3,6 +3,9 @@ kind: Pipeline
 metadata:
   name: default
 spec:
+  branching:
+    pattern: 'ai-sdlc/{issueIdLower}-{slug}'
+    targetBranch: master
   triggers:
     - event: issue.labeled
       filter:
@@ -32,8 +35,6 @@ spec:
   # workflow. These were formerly in a separate pipeline-backlog.yaml file
   # (deprecated by AISDLC-245.5). Slash commands + pipeline-cli readers
   # prefer this canonical location.
-  branching:
-      targetBranch: master
   backlog:
     branching:
       pattern: 'ai-sdlc/{issueIdLower}-{slug}'
