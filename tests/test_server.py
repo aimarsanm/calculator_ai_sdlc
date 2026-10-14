@@ -52,3 +52,27 @@ def test_serves_index_and_blocks_traversal(base_url):
     with pytest.raises(urllib.error.HTTPError) as e:
         urllib.request.urlopen(base_url + "/../server.py")
     assert e.value.code == 404
+
+
+def request(base_url, method, path):
+    req = urllib.request.Request(base_url + path, method=method)
+    with urllib.request.urlopen(req) as r:
+        return r.status, json.load(r)
+
+
+def test_history_records_successful_calculations_only(base_url):
+    request(base_url, "DELETE", "/api/history")
+    post(base_url, {"expression": "2+2"})
+    post(base_url, {"expression": "1/0"})
+    post(base_url, {"expression": "3*3"})
+    status, body = request(base_url, "GET", "/api/history")
+    assert status == 200
+    items = body["history"]
+    assert [(i["expression"], i["result"]) for i in items] == [("2+2", 4), ("3*3", 9)]
+    assert items[0]["id"] != items[1]["id"] and "timestamp" in items[0]
+
+
+def test_history_delete_clears(base_url):
+    post(base_url, {"expression": "1+1"})
+    assert request(base_url, "DELETE", "/api/history") == (200, {"history": []})
+    assert request(base_url, "GET", "/api/history") == (200, {"history": []})

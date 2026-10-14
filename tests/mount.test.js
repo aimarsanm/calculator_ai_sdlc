@@ -67,3 +67,43 @@ test('muestra el error del backend y C limpia la pantalla', async () => {
   clear.click();
   assert.strictEqual(byId.result.textContent, '0');
 });
+
+test('historial: renderiza, recarga al hacer clic y se limpia', async () => {
+  const { equals, keys, byId, doc } = buildDoc();
+  const make = () => ({ children: [], className: '', textContent: '', listeners: {},
+    appendChild(c) { this.children.push(c); },
+    addEventListener(ev, fn) { this.listeners[ev] = fn; } });
+  const list = make();
+  list.appendChild = function (c) { this.children.push(c); };
+  Object.defineProperty(list, 'textContent', { set() { this.children = []; }, get() { return ''; } });
+  const clearBtn = make();
+  byId['history-list'] = list;
+  byId['history-clear'] = clearBtn;
+  doc.createElement = make;
+  let history = [{ id: 1, expression: '2+2', result: 4 }];
+  const calls = [];
+  const fetchFn = async (url, opts = {}) => {
+    calls.push(`${opts.method || 'GET'} ${url}`);
+    if (opts.method === 'DELETE') history = [];
+    if (url === '/api/calculate') history.push({ id: 2, expression: '5+3', result: 8 });
+    return { ok: true, json: async () => (url === '/api/calculate' ? { result: 8 } : { history }) };
+  };
+  mount(doc, fetchFn);
+  const tick = () => new Promise((r) => setImmediate(r));
+  await tick();
+  assert.strictEqual(list.children.length, 1);
+  assert.strictEqual(list.children[0].children[0].textContent, '2+2 = 4');
+  list.children[0].children[0].listeners.click();
+  assert.strictEqual(byId.expression.textContent, '2+2');
+  assert.strictEqual(byId.result.textContent, '4');
+  for (const k of ['5', '+', '3']) keys.find((b) => b.dataset.key === k).click();
+  equals.click();
+  await tick(); await tick();
+  assert.strictEqual(list.children.length, 2);
+  assert.strictEqual(list.children[0].children[0].textContent, '5+3 = 8');
+  clearBtn.listeners.click();
+  await tick(); await tick();
+  assert.ok(calls.includes('DELETE /api/history'));
+  assert.strictEqual(list.children.length, 1);
+  assert.strictEqual(list.children[0].className, 'history-empty');
+});
