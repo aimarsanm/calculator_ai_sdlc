@@ -35,7 +35,7 @@ spec:
   backlog:
     branching:
       pattern: 'ai-sdlc/{issueIdLower}-{slug}'
-      targetBranch: main
+      targetBranch: master
       cleanup: on-merge
     pullRequest:
       titleTemplate: 'feat: {issueTitle} ({issueId})'
