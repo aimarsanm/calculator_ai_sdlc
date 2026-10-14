@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test tests/calculator.test.js"
+    "test": "node --test tests/calculator.test.js tests/mount.test.js"
   },
   "keywords": [],
   "author": "",
