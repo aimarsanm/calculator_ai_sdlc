@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calculadora</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="calculator">
+    <button id="theme-toggle" class="theme" type="button" aria-label="Cambiar tema">◐</button>
+    <section class="display" aria-live="polite">
+      <div id="expression" class="expression"></div>
+      <div id="result" class="result">0</div>
+    </section>
+    <section class="keys">
+      <button type="button" data-action="clear" class="ctrl">C</button>
+      <button type="button" data-key="/" class="op">/</button>
+      <button type="button" data-key="*" class="op">*</button>
+      <button type="button" data-key="-" class="op">-</button>
+      <button type="button" data-key="7">7</button>
+      <button type="button" data-key="8">8</button>
+      <button type="button" data-key="9">9</button>
+      <button type="button" data-key="+" class="op">+</button>
+      <button type="button" data-key="4">4</button>
+      <button type="button" data-key="5">5</button>
+      <button type="button" data-key="6">6</button>
+      <button type="button" data-key="1">1</button>
+      <button type="button" data-key="2">2</button>
+      <button type="button" data-key="3">3</button>
+      <button type="button" data-action="equals" class="equals">=</button>
+      <button type="button" data-key="0" class="zero">0</button>
+      <button type="button" data-key=".">.</button>
+    </section>
+  </main>
+  <script src="calculator.js"></script>
+</body>
+</html>

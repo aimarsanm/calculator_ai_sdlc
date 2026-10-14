@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test tests/calculator.test.js tests/mount.test.js"
   },
   "keywords": [],
   "author": "",
