@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="layout">
   <main class="calculator">
     <button id="theme-toggle" class="theme" type="button" aria-label="Cambiar tema">◐</button>
     <section class="display" aria-live="polite">
@@ -33,6 +34,17 @@
       <button type="button" data-key=".">.</button>
     </section>
   </main>
+  <aside class="flappy" aria-label="Mini-juego Flappy Bird">
+    <h2>Flappy Bird</h2>
+    <canvas id="flappy-canvas" width="320" height="440" aria-label="Lienzo del juego"></canvas>
+    <div class="flappy-info">
+      <span>Puntos: <strong id="flappy-score">0</strong></span>
+      <span>Récord: <strong id="flappy-best">0</strong></span>
+    </div>
+    <button id="flappy-start" type="button" class="flappy-btn">Jugar</button>
+  </aside>
+  </div>
   <script src="calculator.js"></script>
+  <script src="flappy.js"></script>
 </body>
 </html>

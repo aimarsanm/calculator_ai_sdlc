@@ -32,4 +32,13 @@ button:active { transform: scale(.95); }
 .op, .ctrl { color: var(--accent); }
 .equals { background: var(--accent); color: #fff; }
 .zero { grid-column: span 2; }
+.layout { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; align-items: flex-start; width: 100%; }
+.flappy {
+  width: min(100%, 360px); padding: 1.25rem; border-radius: 28px; background: var(--panel);
+  backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, .15); box-shadow: 0 20px 50px rgba(0, 0, 0, .35);
+}
+.flappy h2 { margin: 0 0 .75rem; font-size: 1.1rem; }
+.flappy canvas { display: block; width: 100%; height: auto; border-radius: 16px; touch-action: manipulation; cursor: pointer; }
+.flappy-info { display: flex; justify-content: space-between; margin: .75rem 0; }
+.flappy-btn { width: 100%; background: var(--accent); color: #fff; }
 @media (max-width: 400px) { .result { font-size: 2rem; } button { padding: .9rem 0; } }
