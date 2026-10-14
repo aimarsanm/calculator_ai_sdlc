@@ -4,4 +4,7 @@ node_modules/
 .ai-sdlc/state/
 .ai-sdlc/audit.jsonl
 .ai-sdlc/artifacts/
-_pycache_/
+
+test-results/
+playwright-report/
+__pycache__/
