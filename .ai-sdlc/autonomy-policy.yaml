@@ -9,7 +9,7 @@ spec:
       description: All actions require human approval
       permissions:
         read: ['**']
-        write: ['src/**', 'test/**', 'tests/**', 'package.json']
+        write: ['src/**', 'test/**', 'tests/**', 'package.json', '.gitignore']
         execute: ['test-suite']
       guardrails:
         requireApproval: all
@@ -24,7 +24,7 @@ spec:
       description: Routine changes are autonomous, complex changes need review
       permissions:
         read: ['**']
-        write: ['src/**', 'test/**', 'tests/**', 'docs/**', 'package.json']
+        write: ['src/**', 'test/**', 'tests/**', 'docs/**', 'package.json','.gitignore']
         execute: ['test-suite', 'lint', 'build']
       guardrails:
         requireApproval: security-critical-only
