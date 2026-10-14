@@ -5,7 +5,7 @@ const press = async (page, keys) => {
 };
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/calculator');
 });
 
 test('5 + 3 = muestra 8 (backend real)', async ({ page }) => {

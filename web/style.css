@@ -42,3 +42,25 @@ button:active { transform: scale(.95); }
 .flappy-info { display: flex; justify-content: space-between; margin: .75rem 0; }
 .flappy-btn { width: 100%; background: var(--accent); color: #fff; }
 @media (max-width: 400px) { .result { font-size: 2rem; } button { padding: .9rem 0; } }
+
+.view { width: 100%; display: flex; flex-direction: column; align-items: center; }
+.view:not([hidden]) { animation: view-in .35s ease both; }
+@keyframes view-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.home { text-align: center; }
+.home h1 { margin: 0; font-size: clamp(1.8rem, 6vw, 2.8rem); }
+.home-sub { opacity: .7; margin: .4rem 0 1.5rem; }
+.home-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; width: min(100%, 560px); }
+.card {
+  display: flex; flex-direction: column; align-items: center; gap: .4rem; padding: 1.5rem 1rem;
+  border-radius: 24px; background: var(--panel); color: var(--text); text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, .15); backdrop-filter: blur(16px);
+  transition: transform .2s, box-shadow .2s;
+}
+.card:hover, .card:focus-visible { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0, 0, 0, .35); }
+.card-icon { font-size: 2.6rem; }
+.card-title { font-size: 1.25rem; font-weight: 600; }
+.card-desc { opacity: .7; font-size: .9rem; }
+.badge { padding: .2rem .7rem; border-radius: 999px; background: var(--accent); color: #fff; font-size: .8rem; }
+.back { align-self: flex-start; margin-bottom: .75rem; color: var(--text); text-decoration: none; opacity: .8; }
+.back:hover { opacity: 1; }
+[hidden] { display: none !important; }

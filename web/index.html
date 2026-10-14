@@ -7,7 +7,26 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <section id="view-home" class="view home" data-view="home">
+    <h1>Bienvenido</h1>
+    <p class="home-sub">Elige qué quieres hacer</p>
+    <nav class="home-cards" aria-label="Navegación principal">
+      <a id="nav-calculator" class="card" href="#/calculator" data-nav="calculator">
+        <span class="card-icon" aria-hidden="true">🧮</span>
+        <span class="card-title">Calculadora</span>
+        <span class="card-desc">Con panel de historial integrado</span>
+        <span class="badge">🕘 Historial</span>
+      </a>
+      <a id="nav-flappy" class="card" href="#/flappy" data-nav="flappy">
+        <span class="card-icon" aria-hidden="true">🐦</span>
+        <span class="card-title">Flappy Bird</span>
+        <span class="card-desc">Mini-juego con récord guardado</span>
+      </a>
+    </nav>
+  </section>
   <div class="layout">
+  <div id="view-calculator" class="view" data-view="calculator" hidden>
+  <a class="back" href="#/" data-nav="home">← Volver al inicio</a>
   <main class="calculator">
     <button id="theme-toggle" class="theme" type="button" aria-label="Cambiar tema">◐</button>
     <section class="display" aria-live="polite">
@@ -34,6 +53,9 @@
       <button type="button" data-key=".">.</button>
     </section>
   </main>
+  </div>
+  <div id="view-flappy" class="view" data-view="flappy" hidden>
+  <a class="back" href="#/" data-nav="home">← Volver al inicio</a>
   <aside class="flappy" aria-label="Mini-juego Flappy Bird">
     <h2>Flappy Bird</h2>
     <canvas id="flappy-canvas" width="320" height="440" aria-label="Lienzo del juego"></canvas>
@@ -44,6 +66,8 @@
     <button id="flappy-start" type="button" class="flappy-btn">Jugar</button>
   </aside>
   </div>
+  </div>
+  <script src="router.js"></script>
   <script src="calculator.js"></script>
   <script src="flappy.js"></script>
 </body>
